@@ -1,7 +1,79 @@
-Connection is active<br><br>New Observation<br><br>NULL
-NULL
-NULL
-NULL
-NULL
-NULL
-<br><br><br>[{"date":"11202022","hour":"15","site":"Buffalo","temp":"17","windspeed":"45","weather":"heavy snow and lightning"},{"date":"11202022","hour":"15","site":"Cleveland","temp":"19","windspeed":"27","weather":"light snow"},{"date":"11202022","hour":"15","site":"Chicago","temp":"15","windspeed":"34","weather":"partly sunny"},{"date":"11202022","hour":"15","site":"Albany","temp":"20","windspeed":"24","weather":"flurries"},{"date":"12232022","hour":"12","site":"Cleveland","temp":"11","windspeed":"49","weather":"Heavy Snow  "},{"date":null,"hour":null,"site":null,"temp":null,"windspeed":null,"weather":null},{"date":"12302022","hour":"22","site":"cle","temp":"12","windspeed":"34","weather":"cold"},{"date":null,"hour":null,"site":null,"temp":null,"windspeed":null,"weather":null}]
+<?php
+
+$site = $_POST["site"];
+$weather     = $_POST["weather"];
+$date    = filter_input(INPUT_POST, "date" , FILTER_VALIDATE_INT);
+$hour    = filter_input(INPUT_POST, "hour" , FILTER_VALIDATE_INT);
+$temperature    = filter_input(INPUT_POST, "temperature" , FILTER_VALIDATE_INT);
+$windspeed    = filter_input(INPUT_POST, "windspeed" , FILTER_VALIDATE_INT);
+
+$con=mysqli_connect('database-2022.comd0yvbqjgv.us-east-1.rds.amazonaws.com', 'admin', 'passwordW','metadata','3306');
+
+
+
+if (mysqli_connect_errno()) {
+  echo "\n Failed to connect to MySQL: \n" . mysqli_connect_error();
+}
+
+echo "Connection is active";
+
+echo "<br>";
+echo "<br>";
+echo "New Observation";
+echo "<br>";
+echo "<br>";
+
+
+var_dump($site , $date, $hour, $temperature, $windspeed, $weather);
+echo "<br>";
+echo "<br>";
+
+
+
+
+
+$insert = "INSERT INTO  `weatherobs` (date, hour, site, temp, windspeed, weather) VALUES (? , ?, ?, ?, ?, ?)  ";
+$stmt = mysqli_stmt_init($con);
+
+if ( !  mysqli_stmt_prepare($stmt,$insert)){
+    die(mysqli_error(con));
+}
+
+mysqli_stmt_bind_param($stmt, "iisiis",
+                       $date,
+                       $hour, 
+                       $site,
+                       $temperature,
+                       $windspeed,
+                       $weather);
+
+
+mysqli_stmt_execute($stmt);
+
+
+$sql = "SELECT * FROM `weatherobs` ";
+
+if ($result = mysqli_query($con, $sql))
+{
+ $resultArray = array();
+ $tempArray = array();
+
+ while($row = $result->fetch_object())
+ {
+         $tempArray = $row;
+     array_push($resultArray, $tempArray);
+ }
+ echo "<br>";
+ echo json_encode($resultArray);
+}
+
+// Close connections
+
+
+
+
+
+
+mysqli_close($con);
+
+?>
